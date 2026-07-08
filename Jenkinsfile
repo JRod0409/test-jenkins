@@ -7,7 +7,7 @@ pipeline {
                 git 'https://github.com/JRod0409/test-jenkins'
             }
         }
-        stage('Build"){
+        stage('Build'){
               steps{
                   sh 'echo "building the app"'
               }
