@@ -1,26 +1,29 @@
 pipeline {
     agent any
-
-    stages {
-        stage('Checkout Code') {
+    environment {
+        IMAGE_NAME = 'JRod0409/test-jenkins'
+    }
+    stages{
+        stage('Checkout'){
             steps{
                 git branch: 'main', url: 'https://github.com/JRod0409/test-jenkins'
             }
         }
-        stage('Build'){
-              steps{
-                  sh 'echo "building the app"'
-              }
-        }
-        stage('Test'){
+        stage('Build Docker Image'){
             steps{
-                sh 'echo "Running test"'
+                bat "docker build -t %IMAGE_NAME%:latest ."
             }
         }
-        stage('Deploy'){
+        stage('Push to Dockerhub'){
             steps{
-                sh 'echo "Deploying app"'
+                withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS)]){
+                    bat """
+                    echo %DOCKER_PASS% |
+                    docker login -u %DOCKER_USER% --password-stdin
+                    docker push %IMAGE_NAME%:latest
+                    docker logout
+                    """
+                }
             }
         }
     }
-}
